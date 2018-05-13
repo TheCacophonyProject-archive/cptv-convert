@@ -71,10 +71,10 @@ def convert_heat_to_img(frame, colormap, temp_min = 2800, temp_max = 4200):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-o', '--output-folder')
-    parser.add_argument('-s', '--source-folder')
-    parser.add_argument('-c', '--colormap')
-    parser.add_argument('-b', '--blink', nargs='?', const=True, default=False)
+    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.")
+    parser.add_argument('-s', '--source-folder', help="Folder with cptv files to convert.")
+    parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.")
+    parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
     args = parser.parse_args()
 
     if args.blink:
