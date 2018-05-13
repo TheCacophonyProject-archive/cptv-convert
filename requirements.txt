@@ -1,0 +1,3 @@
+cptv
+numpy
+matplotlib
