@@ -74,10 +74,13 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('source_folder', help="Folder with cptv files to convert.")
-    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.", default=join(dir, 'videos'))
+    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.", default=None)
     parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.", default=join(dir, 'custom_colormap.dat'))
     parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
     args = parser.parse_args()
+
+    if args.output_folder == None:
+        args.output_folder = join(args.source_folder, 'videos')
 
     if args.blink:
         os.system("echo timer >/sys/class/leds/led0/trigger") #makes the green led blink on the RPi
