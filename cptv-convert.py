@@ -3,6 +3,7 @@ import os
 import pickle
 import numpy as np
 import PIL as pillow
+import glob
 from mpeg_creator import MPEGCreator
 from PIL import Image
 from cptv import CPTVReader
@@ -69,18 +70,22 @@ def convert_heat_to_img(frame, colormap, temp_min = 2800, temp_max = 4200):
     return img
 
 def main():
+    dir = os.path.dirname(os.path.realpath(__file__))
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.")
-    parser.add_argument('-s', '--source-folder', help="Folder with cptv files to convert.")
-    parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.")
+    parser.add_argument('source_folder', help="Folder with cptv files to convert.")
+    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.", default=None)
+    parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.", default=join(dir, 'custom_colormap.dat'))
     parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
     args = parser.parse_args()
+
+    if args.output_folder == None:
+        args.output_folder = join(args.source_folder, 'videos')
 
     if args.blink:
         os.system("echo timer >/sys/class/leds/led0/trigger") #makes the green led blink on the RPi
 
-    cptv_files = [join(args.source_folder, f) for f in os.listdir(args.source_folder) if isfile(join(args.source_folder, f))]
+    cptv_files = glob.glob(join(args.source_folder, '*.cptv'))
     print("files to convert: " + str(len(cptv_files)))
 
     colormap = pickle.load(open(args.colormap, 'rb'))
