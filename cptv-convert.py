@@ -14,8 +14,7 @@ def make_mp4(cptv_file, output_folder, colormap):
 
         # make name and folder for recording
         mp4_name = reader.timestamp.strftime("%Y%m%d-%H%M%S") + ".mp4"
-        #devicename = reader.devicename
-        devicename = "to-be-added"
+        devicename = reader.device_name.decode('utf-8')
         if devicename == None:
             devicename = "NO_DEVICE_NAME"
         else:
