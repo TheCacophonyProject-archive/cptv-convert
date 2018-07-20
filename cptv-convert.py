@@ -11,7 +11,6 @@ from shutil import copyfile
 
 COLORMAP_FILE = join(os.path.dirname(os.path.realpath(__file__)), "colormap.dat")
 
-
 def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
     with open(cptv_file, "rb") as f:
         reader = CPTVReader(f)
@@ -82,6 +81,12 @@ def convert_heat_to_img(frame, colormap, temp_min = 2800, temp_max = 4200):
     img = pillow.Image.fromarray(colorized[:,:,:3]) #ignore alpha
     return img
 
+def print_args(args):
+    print("output folder: ", args.output_folder)
+    print("source folder: ", args.source_folder)
+    print("copy CPTV files: ", args.copy)
+    print("delete origional CPTV: ", args.delete_origional)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -92,6 +97,9 @@ def main():
     parser.add_argument('-m', '--copy', nargs='?', const=True, default=False, help="Will copy the raw recordings to the output folder.")
     parser.add_argument('-d', '--delete-origional', nargs='?', const=True, default=False, help="Will delete the origional recordings that were copied to the output folder.")
     args = parser.parse_args()
+
+    print("Processing CPTV files.")
+    print_args(args)
 
     if args.blink:
         os.system("echo timer >/sys/class/leds/led0/trigger") #makes the green led blink on the RPi
