@@ -93,11 +93,11 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('source_folder', help="Folder with cptv files to convert.")
-    parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.", default=None)
-    parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.", default=join(dir, 'custom_colormap.dat'))
-    parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
-    parser.add_argument('-m', '--copy', nargs='?', const=True, default=False, help="Will copy the raw recordings to the output folder.")
+    parser.add_argument('output_folder', help="Where to save mp4 files.")
+    parser.add_argument('-c', '--copy', nargs='?', const=True, default=False, help="Will copy the raw recordings to the output folder.")
     parser.add_argument('-d', '--delete-origional', nargs='?', const=True, default=False, help="Will delete the origional recordings that were copied to the output folder.")
+    parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
+    parser.add_argument('--colormap', help="Colormap to use for conversion.")
     args = parser.parse_args()
 
     print("Processing CPTV files.")
