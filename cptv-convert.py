@@ -8,22 +8,32 @@ from mpeg_creator import MPEGCreator
 from PIL import Image
 from cptv import CPTVReader
 from os.path import isfile, join
+from shutil import copyfile
 
-def make_mp4(cptv_file, output_folder, colormap):
+def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
     with open(cptv_file, "rb") as f:
         reader = CPTVReader(f)
 
         # make name and folder for recording
-        mp4_name = reader.timestamp.strftime("%Y%m%d-%H%M%S") + ".mp4"
-        devicename = reader.device_name.decode('utf-8')
+        fileName = reader.timestamp.strftime("%Y%m%d-%H%M%S")
+        raw_name = fileName + ".cptv"
+        mp4_name = fileName + ".mp4"
+        devicename = reader.device_name
         if devicename == None:
             devicename = "NO_DEVICE_NAME"
         else:
+            devicename = devicename.decode('utf-8')
+            raw_name = devicename + "_" + raw_name
             mp4_name = devicename + "_" + mp4_name
-        mp4_dir = join(output_folder, devicename)
+        raw_dir = join(output_folder, devicename, "raw-cptv")
+        mp4_dir = join(output_folder, devicename, "cptv-processed")
         os.makedirs(mp4_dir, exist_ok=True)
+        raw_file = join(raw_dir, raw_name)
         mp4_file = join(mp4_dir, mp4_name)
         print(mp4_file)
+        if copy:
+            os.makedirs(raw_dir, exist_ok=True)
+            copyfile(cptv_file, raw_file)
 
         FRAME_SCALE = 4.0
         NORMALISATION_SMOOTH = 0.95
@@ -53,6 +63,8 @@ def make_mp4(cptv_file, output_folder, colormap):
             thermal_image = thermal_image.resize((int(thermal_image.width * FRAME_SCALE), int(thermal_image.height * FRAME_SCALE)), Image.BILINEAR)
             mpeg.next_frame(np.asarray(thermal_image))
         mpeg.close()
+    if copy and delete:
+        os.remove(cptv_file)
 
 def convert_heat_to_img(frame, colormap, temp_min = 2800, temp_max = 4200):
     """
@@ -76,6 +88,8 @@ def main():
     parser.add_argument('-o', '--output-folder', help="Where to save mp4 files.", default=None)
     parser.add_argument('-c', '--colormap', help="Colormap to use for conversion.", default=join(dir, 'custom_colormap.dat'))
     parser.add_argument('-b', '--blink', nargs='?', const=True, default=False, help="Enable blinking (blinks green LED on RPi when converting and solid when done.)")
+    parser.add_argument('-m', '--copy', nargs='?', const=True, default=False, help="Will copy the raw recordings to the output folder.")
+    parser.add_argument('-d', '--delete-origional', nargs='?', const=True, default=False, help="Will delete the origional recordings that were copied to the output folder.")
     args = parser.parse_args()
 
     if args.output_folder == None:
@@ -86,11 +100,10 @@ def main():
 
     cptv_files = glob.glob(join(args.source_folder, '*.cptv'))
     print("files to convert: " + str(len(cptv_files)))
-
     colormap = pickle.load(open(args.colormap, 'rb'))
 
     for cptv_file in cptv_files:
-        make_mp4(cptv_file, args.output_folder, colormap)
+        process_cptv_file(cptv_file, args.output_folder, args.copy, args.delete_origional, colormap)
 
     if args.blink:
         os.system("echo default-on >/sys/class/leds/led0/trigger")
