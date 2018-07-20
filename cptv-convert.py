@@ -9,6 +9,9 @@ from cptv import CPTVReader
 from os.path import isfile, join
 from shutil import copyfile
 
+COLORMAP_FILE = join(os.path.dirname(os.path.realpath(__file__)), "colormap.dat")
+
+
 def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
     with open(cptv_file, "rb") as f:
         reader = CPTVReader(f)
@@ -95,7 +98,10 @@ def main():
 
     cptv_files = [join(args.source_folder, f) for f in os.listdir(args.source_folder) if isfile(join(args.source_folder, f))]
     print("files to convert: " + str(len(cptv_files)))
-    colormap = pickle.load(open(args.colormap, 'rb'))
+    if args.colormap == None:
+        colormap = pickle.load(open(COLORMAP_FILE, 'rb'))
+    else:
+        colormap = pickle.load(open(args.colormap, 'rb'))
 
     for cptv_file in cptv_files:
         process_cptv_file(cptv_file, args.output_folder, args.copy, args.delete_origional, colormap)
