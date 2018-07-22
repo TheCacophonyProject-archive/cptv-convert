@@ -20,10 +20,9 @@ def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
         raw_name = fileName + ".cptv"
         mp4_name = fileName + ".mp4"
         devicename = reader.device_name
-        if devicename == None:
+        if devicename == None or devicename == "":
             devicename = "NO_DEVICE_NAME"
         else:
-            devicename = devicename.decode('utf-8')
             raw_name = devicename + "_" + raw_name
             mp4_name = devicename + "_" + mp4_name
         raw_dir = join(output_folder, devicename, "raw-cptv")
