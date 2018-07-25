@@ -3,6 +3,7 @@ import os
 import pickle
 import numpy as np
 import PIL as pillow
+import tempfile
 from mpeg_creator import MPEGCreator
 from PIL import Image
 from cptv import CPTVReader
@@ -19,6 +20,7 @@ def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
         fileName = reader.timestamp.strftime("%Y%m%d-%H%M%S")
         raw_name = fileName + ".cptv"
         mp4_name = fileName + ".mp4"
+        mp4_temp = join(tempfile.gettempdir(), mp4_name)
         devicename = reader.device_name
         if devicename == None or devicename == "":
             devicename = "NO_DEVICE_NAME"
@@ -33,7 +35,7 @@ def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
         print(mp4_file)
         if copy:
             os.makedirs(raw_dir, exist_ok=True)
-            copyfile(cptv_file, raw_file)
+            copy_file(cptv_file, raw_file)
 
         FRAME_SCALE = 4.0
         NORMALISATION_SMOOTH = 0.95
@@ -41,7 +43,7 @@ def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
         auto_min = None
         auto_max = None
 
-        mpeg = MPEGCreator(mp4_file)
+        mpeg = MPEGCreator(mp4_temp)
         for frame in reader:
             if (auto_min == None):
                 auto_min = np.min(frame[0])
@@ -63,8 +65,16 @@ def process_cptv_file(cptv_file, output_folder, copy, delete, colormap):
             thermal_image = thermal_image.resize((int(thermal_image.width * FRAME_SCALE), int(thermal_image.height * FRAME_SCALE)), Image.BILINEAR)
             mpeg.next_frame(np.asarray(thermal_image))
         mpeg.close()
+    copy_file(mp4_temp, mp4_file)
+    os.remove(mp4_temp)
     if copy and delete:
         os.remove(cptv_file)
+
+def copy_file(src, dest):
+    copyfile(src, dest)
+    fs = os.open(dest, os.O_RDONLY)
+    os.fsync(fs)
+    os.close(fs)
 
 def convert_heat_to_img(frame, colormap, temp_min = 2800, temp_max = 4200):
     """
