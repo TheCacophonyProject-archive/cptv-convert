@@ -1,0 +1,13 @@
+[Unit]
+Description=Trigger cptv-convert when USB is plugged in.
+RequiresMountsFor=/media/cp
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Restart=no
+RemainAfterExit=true
+ExecStart=/home/pi/virtualenv/test1/bin/python /home/pi/cptv-convert/cptv-convert.py /var/spool/collected-cptv/ /media/cp/ -c -b
+
+[Install]
+WantedBy=media-cp.mount
